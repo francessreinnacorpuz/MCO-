@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ChatterUp</title>
+    <script>
+        async function sendMessage() {
+            const messageInput = document.getElementById('messageInput');
+            const message = messageInput.value;
+            await fetch('/send', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ message })
+            });
+            messageInput.value = '';
+            loadMessages();
+        }
+
+        async function loadMessages() {
+            const response = await fetch('/messages');
+            const data = await response.json();
+            const messagesContainer = document.getElementById('messages');
+            messagesContainer.innerHTML = '';
+            data.messages.forEach(msg => {
+                const msgElement = document.createElement('div');
+                msgElement.textContent = `${msg.timestamp} [${msg.username}]: ${msg.message}`;
+                messagesContainer.appendChild(msgElement);
+            });
+        }
+
+        async function registerUser() {
+            const usernameInput = document.getElementById('usernameInput');
+            const username = usernameInput.value;
+            await fetch('/register', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ username })
+            });
+            usernameInput.value = '';
+        }
+
+        async function loginUser() {
+            const usernameInput = document.getElementById('usernameInput');
+            const username = usernameInput.value;
+            await fetch('/login', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ username })
+            });
+            usernameInput.value = '';
+            loadMessages();
+        }
+
+        async function logoutUser() {
+            await fetch('/logout', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                }
+            });
+            loadMessages();
+        }
+
+        window.onload = () => {
+            loadMessages();
+        };
+    </script>
+</head>
+<body>
+    <h1>ChatterUp</h1>
+    <div>
+        <input type="text" id="usernameInput" placeholder="Enter username" />
+        <button onclick="registerUser()">Register</button>
+        <button onclick="loginUser()">Login</button>
+        <button onclick="logoutUser()">Logout</button>
+    </div>
+    <div>
+        <input type="text" id="messageInput" placeholder="Type a message" />
+        <button onclick="sendMessage()">Send</button>
+    </div>
+    <div id="messages"></div>
+</body>
+</html>
